@@ -70,6 +70,26 @@ renderer.setPixelRatio(config.renderer.pixelRatio);
 renderer.setClearColor(config.renderer.clearColor);
 document.body.appendChild(renderer.domElement);
 
+// Create ground plane (wider and below the road)
+const groundGeometry = new THREE.BoxGeometry(
+  config.ground.width,
+  0.1, // Very thin height
+  config.ground.length,
+  1, // Simple segments
+  1,
+  config.plane.lengthSegments
+);
+const groundMaterial = new THREE.MeshStandardMaterial({
+  color: config.ground.color,
+  side: THREE.DoubleSide
+});
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+
+// Position ground so it's below the road and stretches away
+ground.position.y = config.ground.y;
+ground.position.z = -config.ground.length / 2;
+scene.add(ground);
+
 // Create plane - using BoxGeometry for better stretching
 const planeGeometry = new THREE.BoxGeometry(
   config.plane.width,

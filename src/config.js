@@ -9,6 +9,14 @@ export default {
     color: '#6a5a43',    // Blue color by default
   },
   
+  // Ground plane settings
+  ground: {
+    width: 100,          // Width of the ground (extends under houses)
+    length: 1000,        // Same length as the road
+    color: '#4CAF50',    // Green color
+    y: -0.1              // Slightly below the road
+  },
+  
   // Renderer settings
   renderer: {
     clearColor: '#66b9ec',

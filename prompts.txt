@@ -1,0 +1,97 @@
+create  a vite project in this directory with three.js
+
+for now, create a plane, make the color configurable in a config file.
+
+Please only use JavaScript, not TypeScript
+
+-------------------
+
+Disable camera movement
+Make the plane long and stretch it far from the camera to infinity. make the width configurable
+Then position the camera like 30 degrees from the bottom of the plane, looking a bit downwards.
+
+-------------------
+
+Add a menu now, saying "Subsurf" with the option to play and settings option
+
+The title should be white, (configurable)
+
+Play button green
+Setting button blue
+
+-------------------
+
+I want you to add large blocks in different colors to the right and left of the plane. They should not all be just beside the plane, but with a little variation in distance, so that they are not all uniform. Also the height of the blocks, as well as the width.
+but they should all touch eachother.
+Those are going to be the houses
+
+-------------------
+
+Add a plane below the current one, streching into the x space as well, so that it goes under the houses. make it another color, like green
+
+-------------------
+
+I now want you to add three detailed train tracks onto the large slim plane, that scretches across the screen.
+
+-------------------
+
+can you add the wodden planks as well?
+
+-------------------
+
+can you split up the logic into multiple files?
+
+-------------------
+
+Add a character now (bean), with configurable movement. It should only be able to switch between the three tracks
+
+-------------------
+
+I cannot see the caracter now, the camera might be in front of it
+
+-------------------
+
+There is an animation issue, when in the middle lane and switching to the right, the animation starts from the left track and goes to the middle. It should be from the right track to the middle
+
+-------------------
+
+There are a few bugs
+
+1. The planks below the tracks, start after like 1 minute after pressing start, not from the start
+
+2. The camera now starts behind the plane and sees the void behind it.
+
+3. The buildings and the plane should not stop generating, as well as the tracks
+
+-------------------
+
+I had to adjust it to 500 to fix the planks
+
+Also the houses are generating again, but there is a huge gap from the initial houses to the new ones. Also the track stops at that point as well
+
+-------------------
+
+
+
+-------------------
+
+
+
+-------------------
+
+
+
+-------------------
+
+
+
+-------------------
+
+
+
+-------------------
+
+
+
+-------------------
+

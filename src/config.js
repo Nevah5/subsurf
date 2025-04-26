@@ -35,6 +35,17 @@ export default {
     y: 0.1                     // Position just above the road
   },
   
+  // Character settings
+  character: {
+    radius: 0.5,               // Radius of the bean character
+    height: 1.8,               // Height of the bean character - increased for visibility
+    color: '#FF4500',          // Bright orange-red color for better visibility
+    speed: 15,                 // Movement speed
+    jumpHeight: 1.5,           // Height of jump when switching tracks - increased
+    acceleration: 0.2,         // How quickly the character speeds up
+    maxSpeed: 30               // Maximum speed the character can reach
+  },
+  
   // Renderer settings
   renderer: {
     clearColor: '#66b9ec',

@@ -1,7 +1,36 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import config from './config.js';
 import './style.css';
+
+// Setup menu from config
+function setupMenu() {
+  const menuTitle = document.getElementById('menu-title');
+  const playButton = document.getElementById('play-button');
+  const settingsButton = document.getElementById('settings-button');
+
+  // Apply title text and color from config
+  menuTitle.textContent = config.menu.title.text;
+  menuTitle.style.color = config.menu.title.color;
+
+  // Apply play button text and styles
+  playButton.textContent = config.menu.buttons.play.text;
+  playButton.style.color = config.menu.buttons.play.color;
+  playButton.style.backgroundColor = config.menu.buttons.play.backgroundColor;
+
+  // Apply settings button text and styles
+  settingsButton.textContent = config.menu.buttons.settings.text;
+  settingsButton.style.color = config.menu.buttons.settings.color;
+  settingsButton.style.backgroundColor = config.menu.buttons.settings.backgroundColor;
+
+  // Button event listeners
+  playButton.addEventListener('click', () => {
+    document.getElementById('menu').style.display = 'none';
+  });
+
+  settingsButton.addEventListener('click', () => {
+    alert('Settings not implemented yet');
+  });
+}
 
 // Create scene
 const scene = new THREE.Scene();
@@ -19,6 +48,11 @@ camera.position.set(
   config.camera.position.z
 );
 
+// Apply camera rotation
+camera.rotation.x = config.camera.rotation.x;
+camera.rotation.y = config.camera.rotation.y;
+camera.rotation.z = config.camera.rotation.z;
+
 // Create renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -26,23 +60,23 @@ renderer.setPixelRatio(config.renderer.pixelRatio);
 renderer.setClearColor(config.renderer.clearColor);
 document.body.appendChild(renderer.domElement);
 
-// Add orbit controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-// Create plane
-const planeGeometry = new THREE.PlaneGeometry(
+// Create plane - using BoxGeometry for better stretching
+const planeGeometry = new THREE.BoxGeometry(
   config.plane.width,
-  config.plane.height,
+  0.1, // Very thin height
+  config.plane.length,
   config.plane.widthSegments,
-  config.plane.heightSegments
+  1,
+  config.plane.lengthSegments
 );
 const planeMaterial = new THREE.MeshStandardMaterial({
   color: config.plane.color,
   side: THREE.DoubleSide
 });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.rotation.x = Math.PI / 2; // Rotate plane to be horizontal
+
+// Position plane so it stretches away from the camera
+plane.position.z = -config.plane.length / 2;
 scene.add(plane);
 
 // Add lighting
@@ -63,8 +97,9 @@ window.addEventListener('resize', () => {
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
   renderer.render(scene, camera);
 }
 
+// Initialize
+setupMenu();
 animate();

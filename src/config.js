@@ -17,6 +17,24 @@ export default {
     y: -0.1              // Slightly below the road
   },
   
+  // Train tracks settings
+  tracks: {
+    count: 3,                  // Number of tracks
+    spacing: 2.5,              // Space between track centers
+    railWidth: 0.3,            // Width of each rail
+    railHeight: 0.15,          // Height of rails
+    railColor: '#555555',      // Dark gray for rails
+    tieWidth: 0.1,             // Width of railroad ties
+    tieLength: 2.5,            // Length of railroad ties (perpendicular to rails)
+    tieHeight: 0.1,            // Height of railroad ties
+    tieColor: '#3d2817',       // Brown color for wooden ties
+    tieSpacing: 1,             // Space between ties
+    ballastWidth: 3,           // Width of the ballast (gravel bed)
+    ballastColor: '#7a7877',   // Gray color for ballast
+    ballastHeight: 0.05,       // Height of ballast
+    y: 0.1                     // Position just above the road
+  },
+  
   // Renderer settings
   renderer: {
     clearColor: '#66b9ec',

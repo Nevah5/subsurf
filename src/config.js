@@ -35,6 +35,23 @@ export default {
     y: 0.1                     // Position just above the road
   },
   
+  // Train settings
+  train: {
+    width: 2.2,                // Width of train (slightly narrower than track spacing)
+    height: 2.5,               // Height of train
+    locomotiveLength: 5,       // Length of the locomotive
+    wagonLength: 7,            // Length of each wagon
+    gap: 0.2,                  // Gap between wagons
+    minLength: 15,             // Minimum train length (including locomotive and wagons)
+    maxLength: 40,             // Maximum train length
+    speed: 25,                 // Speed the train moves at
+    spawnInterval: 5,          // Time between train spawns in seconds
+    locomotiveColor: '#d63031',// Red locomotive
+    wagonColor1: '#0984e3',    // Blue wagon
+    wagonColor2: '#00b894',    // Green wagon
+    windowColor: '#74b9ff'     // Light blue windows
+  },
+  
   // Collectible coins settings
   coins: {
     radius: 0.3,               // Radius of the coin

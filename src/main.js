@@ -16,9 +16,14 @@ import {
   createCoins, checkCoinCollisions, 
   createCoinUI, updateCoinUI, showCoinUI 
 } from './modules/coin.js';
+import {
+  createTrainGenerator,
+  checkTrainCollisions
+} from './modules/train.js';
 
 // Game state
 let isPlaying = false;
+let gameOver = false;
 let lastTime = 0;
 let worldChunks = []; // Store world chunks
 let nextChunkPosition = 0; // Position for the next chunk
@@ -27,6 +32,7 @@ const VISIBLE_CHUNKS = 2; // Number of chunks to keep visible ahead of player
 let coinCount = 0;
 let coinUI;
 let coins = { positions: [] }; // Initialize empty coins object
+let trainGenerator;
 
 // Initialize scene
 const scene = createScene();
@@ -52,6 +58,12 @@ setupCharacterControls(character);
 
 // Create the coin UI but don't show it yet
 coinUI = createCoinUI();
+
+// Create game over UI
+const gameOverUI = createGameOverUI();
+
+// Create train generator
+trainGenerator = createTrainGenerator(config, scene);
 
 // Add lighting
 setupLighting(scene);
@@ -143,6 +155,13 @@ function initializeWorld() {
   coins.positions = [];
   updateCoinUI(coinUI, coinCount);
   
+  // Reset trains
+  trainGenerator.reset();
+  
+  // Reset game state
+  gameOver = false;
+  hideGameOverUI();
+  
   // Create initial chunks starting from 0 (character's position)
   // and going forward into the negative z direction
   nextChunkPosition = 0;
@@ -154,7 +173,7 @@ function initializeWorld() {
 
 // Update world chunks based on character position
 function updateWorld() {
-  if (!isPlaying) return;
+  if (!isPlaying || gameOver) return;
   
   const characterZ = character.object.position.z;
   
@@ -193,6 +212,101 @@ function updateWorld() {
   });
 }
 
+// Create Game Over UI
+function createGameOverUI() {
+  // Create container
+  const container = document.createElement('div');
+  container.id = 'game-over';
+  container.style.position = 'absolute';
+  container.style.top = '50%';
+  container.style.left = '50%';
+  container.style.transform = 'translate(-50%, -50%)';
+  container.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  container.style.color = '#FFFFFF';
+  container.style.padding = '30px';
+  container.style.borderRadius = '10px';
+  container.style.textAlign = 'center';
+  container.style.fontFamily = 'Arial, sans-serif';
+  container.style.zIndex = '1000';
+  container.style.display = 'none';
+  
+  // Game over title
+  const title = document.createElement('h1');
+  title.textContent = 'GAME OVER';
+  title.style.fontSize = '48px';
+  title.style.margin = '0 0 20px 0';
+  title.style.color = '#FF4500';
+  
+  // Score display
+  const scoreText = document.createElement('div');
+  scoreText.id = 'final-score';
+  scoreText.textContent = 'Coins collected: 0';
+  scoreText.style.fontSize = '24px';
+  scoreText.style.margin = '10px 0 30px 0';
+  
+  // Retry button
+  const retryButton = document.createElement('button');
+  retryButton.textContent = 'Try Again';
+  retryButton.style.backgroundColor = '#4CAF50';
+  retryButton.style.color = '#FFFFFF';
+  retryButton.style.border = 'none';
+  retryButton.style.padding = '12px 24px';
+  retryButton.style.fontSize = '18px';
+  retryButton.style.borderRadius = '5px';
+  retryButton.style.cursor = 'pointer';
+  retryButton.style.fontWeight = 'bold';
+  
+  retryButton.addEventListener('click', () => {
+    // Reset character position
+    character.object.position.set(
+      character.trackPositions[1], // Middle track
+      config.character.height / 2 + 0.2,
+      0
+    );
+    character.currentTrack = 1;
+    
+    // Restart game
+    initializeWorld();
+    isPlaying = true;
+  });
+  
+  // Assemble UI
+  container.appendChild(title);
+  container.appendChild(scoreText);
+  container.appendChild(retryButton);
+  
+  // Add to document
+  document.body.appendChild(container);
+  
+  return {
+    container,
+    scoreText,
+    show: (score) => {
+      scoreText.textContent = `Coins collected: ${score}`;
+      container.style.display = 'block';
+    },
+    hide: () => {
+      container.style.display = 'none';
+    }
+  };
+}
+
+// Show game over UI
+function showGameOverUI() {
+  gameOverUI.show(coinCount);
+}
+
+// Hide game over UI
+function hideGameOverUI() {
+  gameOverUI.hide();
+}
+
+// End the game
+function endGame() {
+  gameOver = true;
+  showGameOverUI();
+}
+
 // Animation loop
 function animate(time) {
   requestAnimationFrame(animate);
@@ -202,9 +316,26 @@ function animate(time) {
   lastTime = time;
   
   // Update game state
-  if (isPlaying) {
+  if (isPlaying && !gameOver) {
     // Update character position and animation
     character.update(delta);
+    
+    // Update trains
+    const trains = trainGenerator.update(delta, character.object.position.z);
+    
+    // Check train collisions
+    const collisionResult = checkTrainCollisions(character, trains, config);
+    if (collisionResult.collision) {
+      // Player hit a train - game over
+      endGame();
+    } else if (collisionResult.onTopOfTrain) {
+      // Player is riding on top of a train - slightly elevate character
+      character.object.position.y = config.train.height + config.tracks.y + 
+                                    config.tracks.railHeight + config.character.height / 2 + 0.2;
+    } else {
+      // Player is on the track - normal height
+      character.object.position.y = config.character.height / 2 + 0.2;
+    }
     
     // Move camera to follow character
     camera.position.z = character.object.position.z + 10; // Position camera behind character

@@ -18,8 +18,7 @@ export function createCharacter(config) {
   });
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
   
-  // Rotate the capsule to stand upright
-  body.rotation.x = Math.PI / 2;
+  // Capsule should be upright (no rotation needed)
   characterGroup.add(body);
   
   // Character state
@@ -28,9 +27,9 @@ export function createCharacter(config) {
     currentTrack: 1, // Start on middle track (0: left, 1: middle, 2: right)
     previousTrack: 1, // Store the previous track to know which direction we're coming from
     speed: config.character.speed,
-    isJumping: false,
-    jumpHeight: config.character.jumpHeight,
-    jumpProgress: 0,
+    isChangingLane: false,
+    laneChangeProgress: 0,
+    laneChangeSpeed: 4.0, // Speed of lane change (higher = faster)
     trackPositions: [],
     
     // Initialize track positions based on config
@@ -50,15 +49,15 @@ export function createCharacter(config) {
     
     // Move character to a different track
     switchTrack(direction) {
-      // Only switch if not currently jumping
-      if (this.isJumping) return;
+      // Only switch if not currently changing lanes
+      if (this.isChangingLane) return;
       
       const newTrack = this.currentTrack + direction;
       
       // Check if the new track exists
       if (newTrack >= 0 && newTrack < config.tracks.count) {
-        this.isJumping = true;
-        this.jumpProgress = 0;
+        this.isChangingLane = true;
+        this.laneChangeProgress = 0;
         this.previousTrack = this.currentTrack;
         this.currentTrack = newTrack;
       }
@@ -69,29 +68,22 @@ export function createCharacter(config) {
       this.object.position.z -= this.speed * delta;
     },
     
-    // Update character position and jumping animation
+    // Update character position and lane change animation
     update(delta) {
-      // Handle jumping animation
-      if (this.isJumping) {
-        this.jumpProgress += delta * 5; // Controls jump speed
+      // Handle lane change animation (smooth sliding)
+      if (this.isChangingLane) {
+        this.laneChangeProgress += delta * this.laneChangeSpeed;
         
-        if (this.jumpProgress >= 1) {
-          // Jump finished
-          this.jumpProgress = 0;
-          this.isJumping = false;
+        if (this.laneChangeProgress >= 1) {
+          // Lane change finished
+          this.laneChangeProgress = 0;
+          this.isChangingLane = false;
           this.object.position.x = this.trackPositions[this.currentTrack];
-          this.object.position.y = config.character.height / 2 + 0.2;
         } else {
-          // During jump animation
-          const jumpCurve = Math.sin(this.jumpProgress * Math.PI);
-          
-          // Horizontal movement (lerp between previous and current track)
+          // During lane change animation (smooth linear interpolation)
           const startX = this.trackPositions[this.previousTrack];
           const endX = this.trackPositions[this.currentTrack];
-          this.object.position.x = THREE.MathUtils.lerp(startX, endX, this.jumpProgress);
-          
-          // Vertical movement (arc)
-          this.object.position.y = config.character.height / 2 + 0.2 + jumpCurve * this.jumpHeight;
+          this.object.position.x = THREE.MathUtils.lerp(startX, endX, this.laneChangeProgress);
         }
       }
       
@@ -108,9 +100,13 @@ export function setupCharacterControls(character) {
   document.addEventListener('keydown', (event) => {
     switch (event.key) {
       case 'ArrowLeft':
+      case 'a':
+      case 'A':
         character.switchTrack(-1); // Move left
         break;
       case 'ArrowRight':
+      case 'd':
+      case 'D':
         character.switchTrack(1); // Move right
         break;
     }

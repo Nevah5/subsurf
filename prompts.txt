@@ -71,6 +71,41 @@ Also the houses are generating again, but there is a huge gap from the initial h
 
 -------------------
 
+Can you remove the jumping animation, and make the bean stand upright, like a player
+He should switch the lanes (tracks) smoothly
+
+Also enable playing with A and D
+
+-------------------
+
+The houses are still bugged, they don´t start generating again, just after they stopped. Also the track
+
+Maybe you need to completely rework the generation
+
+-------------------
+
+The tracks are not generated directly from the beginning
+
+-------------------
+
+The tracks now start from the beginning, but not the woodden planks
+
+-------------------
+
+still not starting from the beginning
+
+-------------------
+
+Can you completely rework the rails? Remove all the code, then write new code
+
+Seems like you can´t get the generation to work, start from behind the initial player position with the rails, so that they start from the beginning for sure
+
+-------------------
+
+I want you to add some random generated coins on the track, that the player can collect. They should count towards a coin score, displayed on the top right of the screen.
+
+-------------------
+
 
 
 -------------------

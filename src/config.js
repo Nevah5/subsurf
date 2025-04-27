@@ -35,6 +35,18 @@ export default {
     y: 0.1                     // Position just above the road
   },
   
+  // Collectible coins settings
+  coins: {
+    radius: 0.3,               // Radius of the coin
+    thickness: 0.1,            // Thickness of the coin
+    color: '#FFD700',          // Gold color
+    height: 0.7,               // Height above the track
+    minPerTrack: 5,            // Minimum coins per track
+    maxPerTrack: 15,           // Maximum coins per track
+    collectionDistance: 1.0,   // How close character needs to be to collect
+    rotationSpeed: 2.0         // How fast coins rotate
+  },
+  
   // Character settings
   character: {
     radius: 0.5,               // Radius of the bean character

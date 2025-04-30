@@ -157,7 +157,7 @@ export function createTrainGenerator(config, scene) {
   );
   
   // Generate a train with random number of cars using the tram model
-  function generateTrain(trackIndex) {
+  function generateTrain(trackIndex, playerZ = 0) {
     const trackPositions = calculateTrackPositions(config);
     const x = trackPositions[trackIndex];
     
@@ -166,7 +166,7 @@ export function createTrainGenerator(config, scene) {
     
     // If model is not loaded yet, wait for next frame
     if (!tramModel) {
-      setTimeout(() => generateTrain(trackIndex), 500);
+      setTimeout(() => generateTrain(trackIndex, playerZ), 500);
       return;
     }
     
@@ -205,8 +205,10 @@ export function createTrainGenerator(config, scene) {
     // Adjust final train length to account for the last car
     trainLength = Math.max(trainLength, config.train.minLength);
     
-    // Position the train closer to the visible area for quicker appearance
-    const startZ = -300; // Moved from -1000 to -300 to appear more quickly
+    // Position the train relative to the player's position
+    // Always spawn a fixed distance away from the player rather than at a fixed position in the world
+    const spawnDistance = 300; // Distance behind player to spawn train
+    const startZ = playerZ - spawnDistance;
     
     // Calculate the appropriate Y position based on the track and model
     const yPos = config.tracks.y + config.tracks.railHeight + config.train.model.yOffset;
@@ -242,7 +244,7 @@ export function createTrainGenerator(config, scene) {
   // Generate initial train on a random track
   setTimeout(() => {
     const randomTrack = Math.floor(Math.random() * config.tracks.count);
-    generateTrain(randomTrack);
+    generateTrain(randomTrack, 0); // Initial spawn at origin
   }, 1000); // Slight delay to ensure model is loaded
   
   // Update function to be called every frame
@@ -254,8 +256,8 @@ export function createTrainGenerator(config, scene) {
       // Choose a random track
       const trackIndex = Math.floor(Math.random() * config.tracks.count);
       
-      // Generate a train on that track
-      generateTrain(trackIndex);
+      // Generate a train on that track, using player's current Z position
+      generateTrain(trackIndex, playerZ);
       
       // Reset spawn timer with some randomness
       timeSinceLastSpawn = 0;

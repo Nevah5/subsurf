@@ -126,7 +126,9 @@ Can you make the spawning of trains and coins earlier? seems like they start aft
 
 -------------------
 
-
+It seems like the train spawning is still broken, can you please fix it?
+Currently what happens is that the train spawns in front of the player, but as he runs, it spawn closer and closer until no more trains spawn.
+I think what happens is that the point where those trains spawn is moving closer to the player, what shouldn´t happen.
 
 -------------------
 

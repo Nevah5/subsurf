@@ -49,7 +49,19 @@ export default {
     locomotiveColor: '#d63031',// Red locomotive
     wagonColor1: '#0984e3',    // Blue wagon
     wagonColor2: '#00b894',    // Green wagon
-    windowColor: '#74b9ff'     // Light blue windows
+    windowColor: '#74b9ff',    // Light blue windows
+    
+    // 3D model settings
+    model: {
+      path: 'src/models/Tram.glb',  // Path to the model file
+      scale: 0.1,                    // Scale of the model
+      yOffset: 0.1,                  // Height adjustment for the model
+      numCars: {                     // Number of cars to use
+        min: 1,                      // Minimum number of cars
+        max: 3                       // Maximum number of cars
+      },
+      carSpacing: 0.1                // Space between cars
+    }
   },
   
   // Collectible coins settings

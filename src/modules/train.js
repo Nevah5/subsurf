@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Function to create a train with variable length
 export function createTrain(config, trackIndex, startZ, length) {
@@ -136,47 +137,81 @@ export function createTrainGenerator(config, scene) {
   // Track time since last train spawn
   let timeSinceLastSpawn = 0;
   
-  // Generate a train with random length and color pattern
+  // Store loaded tram model for reuse
+  let tramModel = null;
+  const modelLoader = new GLTFLoader();
+  
+  // Load the tram model once and store it
+  modelLoader.load(
+    config.train.model.path,
+    (gltf) => {
+      tramModel = gltf.scene;
+      console.log("Tram model loaded successfully");
+    },
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total) * 100 + '% tram model loaded');
+    },
+    (error) => {
+      console.error('Error loading tram model:', error);
+    }
+  );
+  
+  // Generate a train with random number of cars using the tram model
   function generateTrain(trackIndex) {
     const trackPositions = calculateTrackPositions(config);
     const x = trackPositions[trackIndex];
     
-    // Choose a random length (in wagons) for the train
-    const minWagons = Math.ceil(config.train.minLength / config.train.wagonLength);
-    const maxWagons = Math.floor(config.train.maxLength / config.train.wagonLength);
-    const numWagons = Math.floor(Math.random() * (maxWagons - minWagons + 1)) + minWagons;
-    
     // Create train group
     const trainGroup = new THREE.Group();
     
-    // Create locomotive (first car)
-    const locomotive = createLocomotive(config);
-    trainGroup.add(locomotive);
-    
-    // Calculate total train length including locomotive
-    let trainLength = config.train.locomotiveLength;
-    
-    // Add wagons
-    for (let i = 0; i < numWagons; i++) {
-      // Add gap between cars
-      trainLength += config.train.gap;
-      
-      // Create and position wagon
-      const wagon = createWagon(config, i % 2 === 0 ? config.train.wagonColor1 : config.train.wagonColor2);
-      wagon.position.z = -trainLength - config.train.wagonLength / 2;
-      trainGroup.add(wagon);
-      
-      // Update train length
-      trainLength += config.train.wagonLength;
+    // If model is not loaded yet, wait for next frame
+    if (!tramModel) {
+      setTimeout(() => generateTrain(trackIndex), 500);
+      return;
     }
+    
+    // Choose a random number of cars for this train
+    const minCars = config.train.model.numCars.min;
+    const maxCars = config.train.model.numCars.max;
+    const numCars = Math.floor(Math.random() * (maxCars - minCars + 1)) + minCars;
+    
+    // Calculate total train length based on the tram model
+    // Here we use an approximation based on the visual size of the tram
+    const carLength = config.train.locomotiveLength; // Use the locomotive length as a reference
+    let trainLength = 0;
+    
+    // Create and add tram cars
+    for (let i = 0; i < numCars; i++) {
+      // Clone the model for each car
+      const tramCar = tramModel.clone();
+      
+      // Scale the model
+      const scale = config.train.model.scale;
+      tramCar.scale.set(scale, scale, scale);
+      
+      // Position this car based on the total train length so far
+      tramCar.position.z = -trainLength;
+      
+      // Rotate to face the correct direction
+      tramCar.rotation.y = Math.PI; // Rotate 180 degrees to face forward
+      
+      // Add to train group
+      trainGroup.add(tramCar);
+      
+      // Update train length for next car positioning
+      trainLength += carLength + config.train.model.carSpacing;
+    }
+    
+    // Adjust final train length to account for the last car
+    trainLength = Math.max(trainLength, config.train.minLength);
     
     // Position the train far behind the visible area
     const startZ = -1000;
-    trainGroup.position.set(
-      x, 
-      config.tracks.y + config.tracks.railHeight + config.train.height / 2,
-      startZ
-    );
+    
+    // Calculate the appropriate Y position based on the track and model
+    const yPos = config.tracks.y + config.tracks.railHeight + config.train.model.yOffset;
+    
+    trainGroup.position.set(x, yPos, startZ);
     
     // Add to scene
     scene.add(trainGroup);
@@ -202,118 +237,6 @@ export function createTrainGenerator(config, scene) {
     }
     
     return trackPositions;
-  }
-  
-  /**
-   * Create a locomotive (first car of the train)
-   */
-  function createLocomotive(config) {
-    const group = new THREE.Group();
-    
-    // Base dimensions
-    const width = config.train.width;
-    const height = config.train.height;
-    const length = config.train.locomotiveLength;
-    
-    // Create main body
-    const bodyGeometry = new THREE.BoxGeometry(width, height, length);
-    const bodyMaterial = new THREE.MeshStandardMaterial({ color: config.train.locomotiveColor });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    
-    // Add front window
-    const windowWidth = width * 0.7;
-    const windowHeight = height * 0.4;
-    const windowDepth = 0.1;
-    const windowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-    const windowMaterial = new THREE.MeshStandardMaterial({ color: config.train.windowColor });
-    const frontWindow = new THREE.Mesh(windowGeometry, windowMaterial);
-    frontWindow.position.z = -length / 2 + windowDepth / 2;
-    frontWindow.position.y = height * 0.1;
-    
-    // Create top part (cabin)
-    const cabinWidth = width * 0.8;
-    const cabinHeight = height * 0.3;
-    const cabinLength = length * 0.6;
-    const cabinGeometry = new THREE.BoxGeometry(cabinWidth, cabinHeight, cabinLength);
-    const cabin = new THREE.Mesh(cabinGeometry, bodyMaterial);
-    cabin.position.y = height / 2 + cabinHeight / 2;
-    cabin.position.z = length * 0.1; // Slightly toward the back
-    
-    // Add details - front lights
-    const lightRadius = 0.3;
-    const lightGeometry = new THREE.SphereGeometry(lightRadius, 16, 16);
-    const lightMaterial = new THREE.MeshStandardMaterial({ 
-      color: 0xffffff,
-      emissive: 0xffffcc,
-      emissiveIntensity: 0.5
-    });
-    
-    const leftLight = new THREE.Mesh(lightGeometry, lightMaterial);
-    leftLight.position.set(-width / 3, -height / 4, -length / 2);
-    
-    const rightLight = new THREE.Mesh(lightGeometry, lightMaterial);
-    rightLight.position.set(width / 3, -height / 4, -length / 2);
-    
-    // Assemble locomotive
-    group.add(body);
-    group.add(frontWindow);
-    group.add(cabin);
-    group.add(leftLight);
-    group.add(rightLight);
-    
-    // Position so the front of the train is at z=0 in the group's coordinate system
-    group.position.z = length / 2;
-    
-    return group;
-  }
-  
-  /**
-   * Create a train wagon
-   */
-  function createWagon(config, color) {
-    const group = new THREE.Group();
-    
-    // Base dimensions
-    const width = config.train.width;
-    const height = config.train.height;
-    const length = config.train.wagonLength;
-    
-    // Create main body
-    const bodyGeometry = new THREE.BoxGeometry(width, height, length);
-    const bodyMaterial = new THREE.MeshStandardMaterial({ color: color });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    
-    // Add windows
-    const windowWidth = width * 0.3;
-    const windowHeight = height * 0.4;
-    const windowDepth = 0.1;
-    const windowSpacing = length / 4;
-    const windowGeometry = new THREE.BoxGeometry(windowWidth, windowHeight, windowDepth);
-    const windowMaterial = new THREE.MeshStandardMaterial({ color: config.train.windowColor });
-    
-    // Add windows on both sides
-    for (let i = -1; i <= 1; i += 2) { // Left and right sides
-      for (let j = -1; j <= 1; j++) { // 3 windows per side
-        if (j === 0) continue; // Skip the middle position
-        
-        const window = new THREE.Mesh(windowGeometry, windowMaterial);
-        window.position.set(
-          (width / 2) * i,
-          0,
-          j * windowSpacing
-        );
-        window.rotation.y = Math.PI / 2;
-        group.add(window);
-      }
-    }
-    
-    // Assemble wagon
-    group.add(body);
-    
-    // Position so the front of the wagon is at z=0 in the group's coordinate system
-    group.position.z = length / 2;
-    
-    return group;
   }
   
   // Update function to be called every frame

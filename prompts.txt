@@ -118,7 +118,7 @@ I have uploaded a title.png in my public folder, can you take this as the backgr
 
 -------------------
 
-
+can you now replace the trains with the Tram.glb model?
 
 -------------------
 

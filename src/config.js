@@ -61,7 +61,7 @@ export default {
     
     // 3D model settings
     model: {
-      path: '/models/Tram.glb',  // Updated path to the model file
+      path: './models/Tram.glb',  // Using relative path to work with base path
       scale: 0.1,                    // Scale of the model
       yOffset: 0.1,                  // Height adjustment for the model
       numCars: {                     // Number of cars to use
@@ -108,7 +108,7 @@ export default {
     
     // 3D model settings
     model: {
-      path: '/models/Character_Animated.glb', // Updated path to the model file
+      path: './models/Character_Animated.glb', // Using relative path to work with base path
       scale: 0.8,                               // Scale of the model 
       animationSpeed: 1.5,                      // Speed multiplier for animations (higher = faster)
       faceDirection: 'backward',                // Direction character faces: 'forward' or 'backward'

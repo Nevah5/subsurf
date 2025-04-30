@@ -132,7 +132,8 @@ I think what happens is that the point where those trains spawn is moving closer
 
 -------------------
 
-
+Seems like the train collision isn't correct yet. Can you add some config options to configure the size of the hitbox? Also add a debug mode into the settings of the menu, where you can make the hitboxes show (also for the coins)
+The coins also seem off and sometimes you get random coins, that you shouldn´t 
 
 -------------------
 

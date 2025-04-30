@@ -101,15 +101,25 @@ export function createTrain(config, trackIndex, startZ, length) {
     speed: config.train.speed,
     length: length,
     active: true,
+    hitbox: null, // Will store hitbox visualization if debug is enabled
     // Collision boundaries
     getBounds() {
       const position = this.object.position;
+      // Apply hitbox scaling from config
+      const hitboxConfig = config.train.hitbox;
+      const width = config.train.width * hitboxConfig.widthScale;
+      const height = config.train.height * hitboxConfig.heightScale;
+      const length = this.length * hitboxConfig.lengthScale;
+      
       return {
         frontZ: position.z,
-        backZ: position.z - this.length,
+        backZ: position.z - length,
         trackIndex: this.trackIndex,
-        topY: config.train.height + config.tracks.y + config.tracks.railHeight,
-        bottomY: config.tracks.y + config.tracks.railHeight
+        topY: position.y + height / 2,
+        bottomY: position.y - height / 2,
+        width: width,
+        height: height,
+        length: length
       };
     },
     // Update train position
@@ -118,6 +128,14 @@ export function createTrain(config, trackIndex, startZ, length) {
       
       // Move train toward player (positive z)
       this.object.position.z += this.speed * delta;
+      
+      // Update hitbox visualization if it exists
+      if (this.hitbox) {
+        this.hitbox.position.copy(this.object.position);
+        // Adjust position to center the hitbox
+        const bounds = this.getBounds();
+        this.hitbox.position.z -= this.length / 2;
+      }
     }
   };
   
@@ -155,6 +173,32 @@ export function createTrainGenerator(config, scene) {
       console.error('Error loading tram model:', error);
     }
   );
+  
+  // Create a hitbox visualization for debugging
+  function createHitboxVisualization(train) {
+    if (!config.debug.enabled || !config.debug.showHitboxes) return null;
+    
+    const bounds = train.getBounds();
+    const hitboxGeometry = new THREE.BoxGeometry(
+      bounds.width,
+      bounds.height,
+      bounds.length
+    );
+    
+    const hitboxMaterial = new THREE.MeshBasicMaterial({
+      color: config.debug.colors.trainHitbox,
+      transparent: true,
+      opacity: config.debug.hitboxOpacity,
+      wireframe: true
+    });
+    
+    const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
+    hitbox.position.copy(train.object.position);
+    hitbox.position.z -= train.length / 2; // Center on the train's length
+    
+    scene.add(hitbox);
+    return hitbox;
+  }
   
   // Generate a train with random number of cars using the tram model
   function generateTrain(trackIndex, playerZ = 0) {
@@ -218,14 +262,59 @@ export function createTrainGenerator(config, scene) {
     // Add to scene
     scene.add(trainGroup);
     
-    // Add to train array with metadata
-    trains.push({
+    // Create train object
+    const train = {
       object: trainGroup,
       trackIndex: trackIndex,
       length: trainLength,
       speed: config.train.speed,
-      removed: false
-    });
+      removed: false,
+      hitbox: null,
+      
+      // Get bounds for collision detection
+      getBounds() {
+        const position = this.object.position;
+        // Apply hitbox scaling from config
+        const hitboxConfig = config.train.hitbox;
+        const width = config.train.width * hitboxConfig.widthScale;
+        const height = config.train.height * hitboxConfig.heightScale;
+        const length = this.length * hitboxConfig.lengthScale;
+        
+        return {
+          frontZ: position.z,
+          backZ: position.z - length,
+          trackIndex: this.trackIndex,
+          topY: position.y + height / 2,
+          bottomY: position.y - height / 2,
+          width: width,
+          height: height,
+          length: length
+        };
+      },
+      
+      // Update train position and hitbox
+      update(delta) {
+        if (this.removed) return;
+        
+        // Move train forward
+        this.object.position.z += this.speed * delta;
+        
+        // Update hitbox visualization if it exists
+        if (this.hitbox) {
+          this.hitbox.position.copy(this.object.position);
+          // Adjust position to center the hitbox
+          this.hitbox.position.z -= this.length / 2;
+        }
+      }
+    };
+    
+    // Create hitbox visualization if debug mode is enabled
+    if (config.debug.enabled && config.debug.showHitboxes) {
+      train.hitbox = createHitboxVisualization(train);
+    }
+    
+    // Add to train array with metadata
+    trains.push(train);
   }
   
   // Calculate valid track positions based on config
@@ -247,6 +336,18 @@ export function createTrainGenerator(config, scene) {
     generateTrain(randomTrack, 0); // Initial spawn at origin
   }, 1000); // Slight delay to ensure model is loaded
   
+  // Toggle debug hitboxes for all trains
+  function toggleHitboxes(enabled) {
+    trains.forEach(train => {
+      if (enabled && !train.hitbox) {
+        train.hitbox = createHitboxVisualization(train);
+      } else if (!enabled && train.hitbox) {
+        scene.remove(train.hitbox);
+        train.hitbox = null;
+      }
+    });
+  }
+  
   // Update function to be called every frame
   function update(delta, playerZ) {
     // Spawn new trains at random intervals
@@ -267,12 +368,15 @@ export function createTrainGenerator(config, scene) {
     trains.forEach(train => {
       if (train.removed) return;
       
-      // Move train forward
-      train.object.position.z += train.speed * delta;
+      // Update train position and hitbox
+      train.update(delta);
       
       // Remove trains that are far past the player
       if (train.object.position.z > playerZ + 100) {
         scene.remove(train.object);
+        if (train.hitbox) {
+          scene.remove(train.hitbox);
+        }
         train.removed = true;
       }
     });
@@ -291,6 +395,9 @@ export function createTrainGenerator(config, scene) {
     // Remove all trains from the scene
     trains.forEach(train => {
       scene.remove(train.object);
+      if (train.hitbox) {
+        scene.remove(train.hitbox);
+      }
     });
     
     // Clear the trains array
@@ -303,7 +410,8 @@ export function createTrainGenerator(config, scene) {
   // Return public API
   return {
     update,
-    reset
+    reset,
+    toggleHitboxes
   };
 }
 
@@ -325,38 +433,31 @@ export function checkTrainCollisions(character, trains, config) {
     onTopOfTrain: false
   };
   
-  // Calculate character dimensions for collision
-  const charRadius = config.character.width / 2;
-  const charHalfHeight = config.character.height / 2;
+  // Calculate character dimensions for collision using hitbox configuration
+  const hitboxConfig = config.character.hitbox;
+  const charRadius = config.character.radius * hitboxConfig.radiusScale;
+  const charHalfHeight = (config.character.height * hitboxConfig.heightScale) / 2;
   
-  // Create a simplified representation of the character as a cylinder
-  // To check if character is on a track with a train
+  // Check collision with each train
   for (let train of trains) {
     // Skip if not on the same track
     if (train.trackIndex !== charTrackIndex) {
       continue;
     }
     
-    // Train position and dimensions
-    const trainPos = train.object.position;
-    const trainWidth = config.train.width;
-    const trainHeight = config.train.height;
-    const trainLength = train.length;
-    
-    // Calculate train bounds
-    const trainFront = trainPos.z;
-    const trainBack = trainPos.z - trainLength;
+    // Get train bounds with hitbox configuration
+    const bounds = train.getBounds();
     
     // Check if character is within train length bounds
-    if (charPos.z >= trainBack && charPos.z <= trainFront) {
+    if (charPos.z >= bounds.backZ && charPos.z <= bounds.frontZ) {
       // Character is in z-range of train, now check height
       
       // If character is above the train (riding on top)
-      const minRidingHeight = trainPos.y + trainHeight / 2 + charHalfHeight * 0.5;
-      if (charPos.y >= minRidingHeight) {
+      const minRidingHeight = bounds.topY + config.train.hitbox.rideHeightOffset;
+      if (charPos.y - charHalfHeight >= minRidingHeight) {
         result.onTopOfTrain = true;
-      } else {
-        // Character is colliding with the train
+      } else if (charPos.y + charHalfHeight >= bounds.bottomY) {
+        // Character is colliding with the train (not above it but within its height)
         result.collision = true;
       }
       

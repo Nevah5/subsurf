@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Create the character using the GLB model
-export function createCharacter(config) {
+export function createCharacter(config, scene) {
   const characterGroup = new THREE.Group();
   
   // Character state with default values
@@ -11,6 +11,7 @@ export function createCharacter(config) {
     model: null,
     mixer: null,
     animations: {},
+    hitboxMesh: null, // For debug visualization
     currentTrack: 1, // Start on middle track (0: left, 1: middle, 2: right)
     previousTrack: 1, // Store the previous track to know which direction we're coming from
     speed: config.character.speed,
@@ -34,7 +35,58 @@ export function createCharacter(config) {
       this.object.position.z = 0; // Start at z=0 so camera can see it
       
       // Load the character model
-      loadCharacterModel(this, config);
+      loadCharacterModel(this, config, scene);
+    },
+    
+    // Create or update hitbox visualization for debug mode
+    updateHitbox(scene) {
+      if (!config.debug.enabled || !config.debug.showHitboxes) {
+        if (this.hitboxMesh) {
+          scene.remove(this.hitboxMesh);
+          this.hitboxMesh = null;
+        }
+        return;
+      }
+      
+      // Create hitbox if it doesn't exist
+      if (!this.hitboxMesh) {
+        const hitboxConfig = config.character.hitbox;
+        const radius = config.character.radius * hitboxConfig.radiusScale;
+        const height = config.character.height * hitboxConfig.heightScale;
+        
+        // Create capsule-like hitbox for character
+        const geometry = new THREE.CapsuleGeometry(
+          radius,
+          height - radius * 2,
+          8,
+          8
+        );
+        
+        const material = new THREE.MeshBasicMaterial({
+          color: config.debug.colors.characterHitbox,
+          transparent: true,
+          opacity: config.debug.hitboxOpacity,
+          wireframe: true
+        });
+        
+        this.hitboxMesh = new THREE.Mesh(geometry, material);
+        scene.add(this.hitboxMesh);
+      }
+      
+      // Update hitbox position
+      if (this.hitboxMesh) {
+        this.hitboxMesh.position.copy(this.object.position);
+      }
+    },
+    
+    // Toggle hitbox visibility
+    toggleHitbox(enabled, scene) {
+      if (enabled) {
+        this.updateHitbox(scene);
+      } else if (this.hitboxMesh) {
+        scene.remove(this.hitboxMesh);
+        this.hitboxMesh = null;
+      }
     },
     
     // Move character to a different track
@@ -75,7 +127,7 @@ export function createCharacter(config) {
     },
     
     // Update character position and lane change animation
-    update(delta) {
+    update(delta, scene) {
       // Update animation mixer with configurable speed
       if (this.mixer) {
         this.mixer.update(delta * config.character.model.animationSpeed);
@@ -111,6 +163,11 @@ export function createCharacter(config) {
       
       // Move forward
       this.moveForward(delta);
+      
+      // Update hitbox if debug is enabled
+      if (config.debug.enabled && config.debug.showHitboxes) {
+        this.updateHitbox(scene);
+      }
     }
   };
   
@@ -118,7 +175,7 @@ export function createCharacter(config) {
 }
 
 // Load the character model
-function loadCharacterModel(character, config) {
+function loadCharacterModel(character, config, scene) {
   const loader = new GLTFLoader();
   
   loader.load(
@@ -161,6 +218,11 @@ function loadCharacterModel(character, config) {
       
       // Log available animations for debugging
       console.log("Available animations:", gltf.animations.map(a => a.name));
+      
+      // Initialize hitbox if debug is enabled
+      if (config.debug.enabled && config.debug.showHitboxes) {
+        character.updateHitbox(scene);
+      }
     },
     (xhr) => {
       // Loading progress

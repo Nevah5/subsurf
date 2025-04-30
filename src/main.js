@@ -14,7 +14,8 @@ import { createHouses } from './modules/house.js';
 import { createCharacter, setupCharacterControls } from './modules/character.js';
 import { 
   createCoins, checkCoinCollisions, 
-  createCoinUI, updateCoinUI, showCoinUI 
+  createCoinUI, updateCoinUI, showCoinUI,
+  toggleCoinHitboxes
 } from './modules/coin.js';
 import {
   createTrainGenerator,
@@ -49,7 +50,7 @@ const initialTracks = createTracks(config);
 scene.add(initialTracks);
 
 // Create character
-const character = createCharacter(config);
+const character = createCharacter(config, scene);
 character.initTrackPositions(config.tracks.spacing);
 scene.add(character.object);
 
@@ -242,6 +243,42 @@ function createGameOverUI() {
   scoreText.style.fontSize = '24px';
   scoreText.style.margin = '10px 0 30px 0';
   
+  // Debug mode checkbox
+  const debugContainer = document.createElement('div');
+  debugContainer.style.margin = '10px 0';
+  debugContainer.style.display = 'flex';
+  debugContainer.style.alignItems = 'center';
+  debugContainer.style.justifyContent = 'center';
+  
+  const debugCheckbox = document.createElement('input');
+  debugCheckbox.type = 'checkbox';
+  debugCheckbox.id = 'debug-checkbox';
+  debugCheckbox.style.marginRight = '10px';
+  debugCheckbox.checked = config.debug.enabled;
+  
+  const debugLabel = document.createElement('label');
+  debugLabel.htmlFor = 'debug-checkbox';
+  debugLabel.textContent = 'Debug Mode (Show Hitboxes)';
+  debugLabel.style.fontSize = '16px';
+  
+  debugContainer.appendChild(debugCheckbox);
+  debugContainer.appendChild(debugLabel);
+  
+  // Event listener for debug checkbox
+  debugCheckbox.addEventListener('change', (e) => {
+    config.debug.enabled = e.target.checked;
+    config.debug.showHitboxes = e.target.checked;
+    
+    // Toggle hitboxes for trains
+    trainGenerator.toggleHitboxes(config.debug.showHitboxes);
+    
+    // Toggle hitboxes for coins
+    toggleCoinHitboxes(coins, config.debug.showHitboxes);
+    
+    // Toggle hitbox for character
+    character.toggleHitbox(config.debug.showHitboxes, scene);
+  });
+  
   // Retry button
   const retryButton = document.createElement('button');
   retryButton.textContent = 'Try Again';
@@ -253,6 +290,7 @@ function createGameOverUI() {
   retryButton.style.borderRadius = '5px';
   retryButton.style.cursor = 'pointer';
   retryButton.style.fontWeight = 'bold';
+  retryButton.style.marginTop = '15px';
   
   retryButton.addEventListener('click', () => {
     // Reset character position
@@ -271,6 +309,7 @@ function createGameOverUI() {
   // Assemble UI
   container.appendChild(title);
   container.appendChild(scoreText);
+  container.appendChild(debugContainer);
   container.appendChild(retryButton);
   
   // Add to document
@@ -316,7 +355,7 @@ function animate(time) {
   // Update game state
   if (isPlaying && !gameOver) {
     // Update character position and animation
-    character.update(delta);
+    character.update(delta, scene);
     
     // Update trains
     const trains = trainGenerator.update(delta, character.object.position.z);

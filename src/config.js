@@ -51,6 +51,14 @@ export default {
     wagonColor2: '#00b894',    // Green wagon
     windowColor: '#74b9ff',    // Light blue windows
     
+    // Hitbox configuration
+    hitbox: {
+      widthScale: 1.5,         // Scale factor for width (1.0 = full width)
+      heightScale: 1.5,        // Scale factor for height (1.0 = full width)
+      lengthScale: 1.5,       // Scale factor for length (1.0 = full length)
+      rideHeightOffset: 0.2    // Height offset for riding on top of train
+    },
+    
     // 3D model settings
     model: {
       path: 'src/models/Tram.glb',  // Path to the model file
@@ -72,8 +80,14 @@ export default {
     height: 0.7,               // Height above the track
     minPerTrack: 5,            // Minimum coins per track
     maxPerTrack: 15,           // Maximum coins per track
-    collectionDistance: 1.0,   // How close character needs to be to collect
-    rotationSpeed: 2.0         // How fast coins rotate
+    collectionDistance: 0.3,   // How close character needs to be to collect
+    rotationSpeed: 2.0,        // How fast coins rotate
+    
+    // Hitbox configuration
+    hitbox: {
+      radiusScale: 1.2,        // Scale factor for collection radius
+      heightRange: 1.5         // Height range for collection (±value from coin center)
+    }
   },
   
   // Character settings
@@ -85,6 +99,12 @@ export default {
     jumpHeight: 1.5,           // Height of jump when switching tracks - increased
     acceleration: 0.2,         // How quickly the character speeds up
     maxSpeed: 30,               // Maximum speed the character can reach
+    
+    // Hitbox configuration
+    hitbox: {
+      radiusScale: 0.8,        // Scale factor for collision radius
+      heightScale: 0.9         // Scale factor for collision height
+    },
     
     // 3D model settings
     model: {
@@ -172,6 +192,18 @@ export default {
         color: "#FFFFFF", // Button text color
         backgroundColor: "#2196F3" // Blue background
       }
+    }
+  },
+
+  // Debug settings
+  debug: {
+    enabled: false,            // Master toggle for debug mode
+    showHitboxes: false,       // Show hitboxes for collision detection
+    hitboxOpacity: 0.3,        // Opacity for hitbox visualization (0-1)
+    colors: {
+      trainHitbox: 0xff0000,   // Red for train hitboxes
+      coinHitbox: 0xffff00,    // Yellow for coin hitboxes
+      characterHitbox: 0x00ff00 // Green for character hitbox
     }
   }
 }

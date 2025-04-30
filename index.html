@@ -12,6 +12,35 @@
         <h1 id="menu-title">SubSurf</h1><br>
         <button id="play-button" class="menu-button">Play</button>
         <button id="settings-button" class="menu-button">Settings</button>
+        
+        <div class="debug-option">
+          <input type="checkbox" id="debug-checkbox" />
+          <label for="debug-checkbox">Show Hitboxes</label>
+        </div>
+      </div>
+    </div>
+    
+    <div id="settings-menu">
+      <h2>Settings</h2>
+      <div class="settings-option">
+        <label for="music-volume">Music Volume</label>
+        <input type="range" id="music-volume" min="0" max="100" value="50">
+      </div>
+      <div class="settings-option">
+        <label for="sfx-volume">SFX Volume</label>
+        <input type="range" id="sfx-volume" min="0" max="100" value="70">
+      </div>
+      <div class="settings-option">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="settings-button-container">
+        <button id="save-settings" class="settings-button">Save</button>
+        <button id="cancel-settings" class="settings-button">Cancel</button>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

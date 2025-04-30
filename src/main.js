@@ -243,42 +243,6 @@ function createGameOverUI() {
   scoreText.style.fontSize = '24px';
   scoreText.style.margin = '10px 0 30px 0';
   
-  // Debug mode checkbox
-  const debugContainer = document.createElement('div');
-  debugContainer.style.margin = '10px 0';
-  debugContainer.style.display = 'flex';
-  debugContainer.style.alignItems = 'center';
-  debugContainer.style.justifyContent = 'center';
-  
-  const debugCheckbox = document.createElement('input');
-  debugCheckbox.type = 'checkbox';
-  debugCheckbox.id = 'debug-checkbox';
-  debugCheckbox.style.marginRight = '10px';
-  debugCheckbox.checked = config.debug.enabled;
-  
-  const debugLabel = document.createElement('label');
-  debugLabel.htmlFor = 'debug-checkbox';
-  debugLabel.textContent = 'Debug Mode (Show Hitboxes)';
-  debugLabel.style.fontSize = '16px';
-  
-  debugContainer.appendChild(debugCheckbox);
-  debugContainer.appendChild(debugLabel);
-  
-  // Event listener for debug checkbox
-  debugCheckbox.addEventListener('change', (e) => {
-    config.debug.enabled = e.target.checked;
-    config.debug.showHitboxes = e.target.checked;
-    
-    // Toggle hitboxes for trains
-    trainGenerator.toggleHitboxes(config.debug.showHitboxes);
-    
-    // Toggle hitboxes for coins
-    toggleCoinHitboxes(coins, config.debug.showHitboxes);
-    
-    // Toggle hitbox for character
-    character.toggleHitbox(config.debug.showHitboxes, scene);
-  });
-  
   // Retry button
   const retryButton = document.createElement('button');
   retryButton.textContent = 'Try Again';
@@ -309,7 +273,6 @@ function createGameOverUI() {
   // Assemble UI
   container.appendChild(title);
   container.appendChild(scoreText);
-  container.appendChild(debugContainer);
   container.appendChild(retryButton);
   
   // Add to document
@@ -390,7 +353,7 @@ function animate(time) {
 animate(0);
 
 // Initialize UI
-setupMenu(config);
+setupMenu(config, scene, character, trainGenerator, coins);
 
 // Start game when play button is clicked
 document.getElementById('play-button').addEventListener('click', () => {

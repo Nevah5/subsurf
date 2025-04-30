@@ -114,23 +114,30 @@ It seems like the train tie spacing is not always used and the tracks are initia
 
 -------------------
 
+I have uploaded a title.png in my public folder, can you take this as the background image in my title screen? You can hide the title that currently shows, as it's included in the image. Please add a small box around the buttons with a transparent background.
 
 -------------------
 
-
--------------------
-
-
--------------------
 
 
 -------------------
 
 
+
 -------------------
 
 
+
 -------------------
+
+
+
+-------------------
+
+
+
+-------------------
+
 
 
 -------------------

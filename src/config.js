@@ -136,7 +136,7 @@ export default {
   // Menu settings
   menu: {
     title: {
-      text: "Subsurf",
+      text: "SubSurf",
       color: "#FFFFFF" // White, configurable
     },
     buttons: {

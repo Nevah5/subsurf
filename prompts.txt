@@ -107,3 +107,31 @@ I want you to add some random generated coins on the track, that the player can 
 -------------------
 
 I now  need some trains with different lengths driving towards the player. They should end the game when the player touches them, except from above, where he can run on them
+
+-------------------
+
+It seems like the train tie spacing is not always used and the tracks are initially always closer together. Only after like some distance are they as they should.
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+
+
+-------------------
+

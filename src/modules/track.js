@@ -115,19 +115,12 @@ function createTies(trackGroup, config) {
   // Place ties starting from the beginning of the player's view
   // and extending through the entire track length
   
-  // Start 10 units before the player to ensure visibility at the start
+  // Use consistent spacing for all track ties
+  const tieSpacing = config.tracks.tieSpacing;
+  // Start from player's view down to end of track
   const playerStartZ = 120;
   
-  // Place dense ties at the very beginning (high density area)
-  for (let z = playerStartZ; z >= -50; z -= 0.3) {
-    const tie = new THREE.Mesh(tieGeometry, tieMaterial);
-    tie.position.set(0, tieY, z);
-    trackGroup.add(tie);
-  }
-  
-  // Continue with regular spacing for the rest of the track
-  const tieSpacing = config.tracks.tieSpacing;
-  for (let z = -50 - tieSpacing; z >= -config.plane.length; z -= tieSpacing) {
+  for (let z = playerStartZ; z >= -config.plane.length; z -= tieSpacing) {
     const tie = new THREE.Mesh(tieGeometry, tieMaterial);
     tie.position.set(0, tieY, z);
     trackGroup.add(tie);

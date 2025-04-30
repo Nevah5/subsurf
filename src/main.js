@@ -98,32 +98,30 @@ function createWorldChunk(startZ) {
   const houses = createHouses(chunkConfig);
   chunk.add(houses);
   
-  // Generate coins for this chunk if it's not the first chunk
-  if (startZ < 0) {
-    // Calculate track positions based on the config
-    const trackPositions = [];
-    const totalWidth = (config.tracks.count - 1) * config.tracks.spacing;
-    const startX = -totalWidth / 2;
-    
-    for (let i = 0; i < config.tracks.count; i++) {
-      trackPositions.push(startX + i * config.tracks.spacing);
-    }
-    
-    // Generate coins for this chunk
-    const chunkCoins = createCoins(config, trackPositions);
-    
-    // Adjust positions for the chunk's local space
-    chunkCoins.group.position.z = -CHUNK_LENGTH / 2;
-    
-    // Add to the chunk
-    chunk.add(chunkCoins.group);
-    
-    // Adjust coin position data for global space and add to overall coins
-    chunkCoins.positions.forEach(coin => {
-      coin.z += startZ - CHUNK_LENGTH / 2; // Adjust z for global space
-      coins.positions.push(coin);
-    });
+  // Generate coins for this chunk (including the first chunk to start earlier)
+  // Calculate track positions based on the config
+  const trackPositions = [];
+  const totalWidth = (config.tracks.count - 1) * config.tracks.spacing;
+  const startX = -totalWidth / 2;
+  
+  for (let i = 0; i < config.tracks.count; i++) {
+    trackPositions.push(startX + i * config.tracks.spacing);
   }
+  
+  // Generate coins for this chunk
+  const chunkCoins = createCoins(config, trackPositions);
+  
+  // Adjust positions for the chunk's local space
+  chunkCoins.group.position.z = -CHUNK_LENGTH / 2;
+  
+  // Add to the chunk
+  chunk.add(chunkCoins.group);
+  
+  // Adjust coin position data for global space and add to overall coins
+  chunkCoins.positions.forEach(coin => {
+    coin.z += startZ - CHUNK_LENGTH / 2; // Adjust z for global space
+    coins.positions.push(coin);
+  });
   
   // Position the entire chunk
   chunk.position.z = startZ;

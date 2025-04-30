@@ -45,7 +45,7 @@ export default {
     minLength: 15,             // Minimum train length (including locomotive and wagons)
     maxLength: 40,             // Maximum train length
     speed: 25,                 // Speed the train moves at
-    spawnInterval: 5,          // Time between train spawns in seconds
+    spawnInterval: 2,          // Time between train spawns in seconds (was 5)
     locomotiveColor: '#d63031',// Red locomotive
     wagonColor1: '#0984e3',    // Blue wagon
     wagonColor2: '#00b894',    // Green wagon

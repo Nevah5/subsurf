@@ -122,7 +122,7 @@ can you now replace the trains with the Tram.glb model?
 
 -------------------
 
-
+Can you make the spawning of trains and coins earlier? seems like they start after like 20 seconds of running right now
 
 -------------------
 

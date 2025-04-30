@@ -27,7 +27,8 @@ export function createCoins(config, trackPositions) {
   // Generate random coins for each track
   trackPositions.forEach((trackX, trackIndex) => {
     // Generate coins along the track with random distribution
-    const startZ = -50; // Start after the beginning of the track
+    // Start coins much closer to the player's starting position
+    const startZ = 30; // Start closer to player (was -50)
     const endZ = -config.plane.length + 50; // End before the end of the track
     
     // Determine how many coins for this track segment

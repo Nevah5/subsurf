@@ -205,8 +205,8 @@ export function createTrainGenerator(config, scene) {
     // Adjust final train length to account for the last car
     trainLength = Math.max(trainLength, config.train.minLength);
     
-    // Position the train far behind the visible area
-    const startZ = -1000;
+    // Position the train closer to the visible area for quicker appearance
+    const startZ = -300; // Moved from -1000 to -300 to appear more quickly
     
     // Calculate the appropriate Y position based on the track and model
     const yPos = config.tracks.y + config.tracks.railHeight + config.train.model.yOffset;
@@ -238,6 +238,12 @@ export function createTrainGenerator(config, scene) {
     
     return trackPositions;
   }
+  
+  // Generate initial train on a random track
+  setTimeout(() => {
+    const randomTrack = Math.floor(Math.random() * config.tracks.count);
+    generateTrain(randomTrack);
+  }, 1000); // Slight delay to ensure model is loaded
   
   // Update function to be called every frame
   function update(delta, playerZ) {

@@ -72,7 +72,17 @@ export default {
     speed: 15,                 // Movement speed
     jumpHeight: 1.5,           // Height of jump when switching tracks - increased
     acceleration: 0.2,         // How quickly the character speeds up
-    maxSpeed: 30               // Maximum speed the character can reach
+    maxSpeed: 30,               // Maximum speed the character can reach
+    
+    // 3D model settings
+    model: {
+      path: 'src/models/Character_Animated.glb', // Path to the model file
+      scale: 0.8,                               // Scale of the model 
+      animationSpeed: 1.5,                      // Speed multiplier for animations (higher = faster)
+      faceDirection: 'backward',                // Direction character faces: 'forward' or 'backward'
+      rotation: Math.PI,                        // Base rotation in radians (Math.PI = 180 degrees)
+      defaultAnimation: 'Run'                   // Default animation to play
+    }
   },
   
   // Renderer settings

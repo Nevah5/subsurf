@@ -334,7 +334,9 @@ function animate(time) {
                                     config.tracks.railHeight + config.character.height / 2 + 0.2;
     } else {
       // Player is on the track - normal height
-      character.object.position.y = config.character.height / 2 + 0.2;
+      if (!character.isChangingLane) {
+        character.object.position.y = config.character.height / 2 + 0.2;
+      }
     }
     
     // Move camera to follow character
